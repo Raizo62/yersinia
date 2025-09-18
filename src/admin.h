@@ -50,7 +50,7 @@ extern int8_t bin_data[];
 /* Extern functions...*/
 extern void   write_log( u_int16_t mode, char *msg, ... );
 extern int8_t attack_kill_th(struct term_node *, pthread_t);
-extern int8_t term_add_node(struct term_node **, int8_t, void *, pthread_t);
+extern int8_t term_add_node(struct term_node **, int8_t, int, pthread_t);
 extern int8_t term_write(struct term_node *, char *, u_int16_t);
 extern void   term_delete_all(void);
 extern void   term_delete_node(struct term_node *, int8_t);

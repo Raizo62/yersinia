@@ -332,7 +332,7 @@ admin_th_network_peer(void *sock)
    if (pthread_mutex_lock(&terms->mutex) != 0)
       thread_error("th_network_peer pthread_mutex_lock",errno);
 
-   fail = term_add_node(&term_node, TERM_VTY, (void *)(intptr_t)sock, pthread_self());
+   fail = term_add_node(&term_node, TERM_VTY, (int)sock, pthread_self());
 
    if (fail == -1)
    {
