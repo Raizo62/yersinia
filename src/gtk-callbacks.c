@@ -765,12 +765,17 @@ gtk_c_clock_update(GtkWidget *clock)
 
 
 void
-gtk_c_tree_update( GtkWidget *tree_model )
+gtk_c_tree_update( GtkListStore *tree_model )
 {
     u_int8_t i, j;
     GtkTreeIter iter;
     GtkTreePath *path;
     char tmp[3];
+
+    if (!GTK_IS_LIST_STORE(tree_model)) {
+        write_log(0, "Error: tree_model is not a valid GtkListStore\n");
+        return;
+    }
 
     j = 0;
     for( i=0; i < MAX_PROTOCOLS; i++ )
@@ -782,8 +787,9 @@ gtk_c_tree_update( GtkWidget *tree_model )
           path = gtk_tree_path_new_from_string( tmp );
           if ( path )
           {
-              gtk_tree_model_get_iter( GTK_TREE_MODEL( tree_model ), &iter, path );
-              gtk_list_store_set( GTK_LIST_STORE( tree_model ), &iter, 1, protocols[i].packets, -1 );
+              if (gtk_tree_model_get_iter( GTK_TREE_MODEL( tree_model ), &iter, path )) {
+                  gtk_list_store_set( tree_model, &iter, 1, protocols[i].packets, -1 );
+              }
               gtk_tree_path_free( path );
           }
           j++;
@@ -794,8 +800,9 @@ gtk_c_tree_update( GtkWidget *tree_model )
     path = gtk_tree_path_new_from_string( tmp );
     if ( path )
     {
-        gtk_tree_model_get_iter( GTK_TREE_MODEL( tree_model ), &iter, path );
-        gtk_list_store_set( GTK_LIST_STORE( tree_model ), &iter, 1, packet_stats.global_counter.total_packets, -1 );
+        if (gtk_tree_model_get_iter( GTK_TREE_MODEL( tree_model ), &iter, path )) {
+            gtk_list_store_set( tree_model, &iter, 1, packet_stats.global_counter.total_packets, -1 );
+        }
         gtk_tree_path_free( path );
     }
 }
@@ -843,11 +850,23 @@ gtk_c_refresh_mwindow(gpointer userdata)
    if ( ! helper->mode || ( helper->mode >= MAX_PROTOCOLS ) ) 
       return TRUE;
 
+   /* Check if the protocol tree exists */
+   if (!protocols_tree[helper->mode] || !GTK_IS_TREE_VIEW(protocols_tree[helper->mode])) {
+      return TRUE;
+   }
+
    params = protocols[helper->mode].parameters;
    extra_params = protocols[helper->mode].extra_parameters;
 
-   if ((tree_model = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(protocols_tree[helper->mode])))) == NULL)
+   if ((tree_model = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(protocols_tree[helper->mode])))) == NULL) {
       write_log(0, "Error in gtk_tree_view_get_model\n");
+      return TRUE;
+   }
+
+   if (!GTK_IS_LIST_STORE(tree_model)) {
+      write_log(0, "Error: tree_model is not a valid GtkListStore\n");
+      return TRUE;
+   }
 
    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL(tree_model), &iter);
 
@@ -1001,9 +1020,19 @@ void gtk_c_tree_selection_changed_cb( GtkTreeSelection *selection, gpointer user
 
     tree = lookup_widget(GTK_WIDGET(helper->notebook), "main_vhvvs_tree");
 
+    if (!tree || !GTK_IS_TREE_VIEW(tree)) {
+        write_log(0, "Error: tree widget is not valid\n");
+        return;
+    }
+
     if ((tree_model = (GtkListStore *)gtk_tree_view_get_model(GTK_TREE_VIEW(tree))) == NULL)
     {
         write_log(0, "Error in gtk_tree_view_get_model\n");
+        return;
+    }
+
+    if (!GTK_IS_LIST_STORE(tree_model)) {
+        write_log(0, "Error: tree_model is not a valid GtkListStore\n");
         return;
     }
 

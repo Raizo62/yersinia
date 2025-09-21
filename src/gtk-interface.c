@@ -1619,7 +1619,6 @@ create_protocol_mwindow(GtkWidget *Main, struct gtk_s_helper *helper, u_int8_t p
    gtk_widget_set_size_request (scroll, 250, 250);
    gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (scroll), protocols_tree[proto]);
    gtk_tree_view_set_model (GTK_TREE_VIEW(protocols_tree[proto]), GTK_TREE_MODEL(protocols_tree_model[proto]));
-   g_object_unref(protocols_tree_model[proto]);
    gtk_widget_show (protocols_tree[proto]);
 
    cell = gtk_cell_renderer_text_new ();
